@@ -19,4 +19,5 @@ $target = "d:\ftp\" <<<--- Computer destination / target directory
 ```
 
 After the variable change copy the code op STEP 1 to the powershell console. 
+
 The next step is to run a code block from STEP 2. Choose between the UPLOAD or DOWNLOAD code block.
