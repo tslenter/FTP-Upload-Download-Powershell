@@ -1,5 +1,5 @@
 <<<< STEP 1 >>>>
-<<<< RUN THIS TO CCHECK THE CONNECTION >>>>
+<<<< RUN THIS TO CHECK THE CONNECTION >>>>
 #test connection for glorie
 Test-NetConnection -ComputerName remoteaccess.xxx.local -Port 21
 
