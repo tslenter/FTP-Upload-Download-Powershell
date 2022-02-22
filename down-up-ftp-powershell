@@ -1,0 +1,75 @@
+<<<< STEP 1 >>>>
+<<<< RUN THIS TO CCHECK THE CONNECTION >>>>
+#test connection for glorie
+Test-NetConnection -ComputerName remoteaccess.xxx.local -Port 21
+
+<<<< RUN THIS TO LIST THE FILES - AFTER THIS RUN YOU ARE ABLE TO RUN THE DOWNLOAD AND UPLOAD SCRIPT >>>>
+#FTP Server Information - SET VARIABLES
+$ftp = "ftp://remoteaccess.xxx.local/" 
+$user = 'user' 
+$pass = 'password'
+$folder = '/'
+$target = "d:\ftp\"
+
+#SET CREDENTIALS
+$credentials = new-object System.Net.NetworkCredential($user, $pass)
+
+function Get-FtpDir ($url,$credentials) {
+    $request = [Net.WebRequest]::Create($url)
+    $request.Method = [System.Net.WebRequestMethods+FTP]::ListDirectory
+    if ($credentials) { $request.Credentials = $credentials }
+    $response = $request.GetResponse()
+    $reader = New-Object IO.StreamReader $response.GetResponseStream() 
+    while(-not $reader.EndOfStream) {
+        $reader.ReadLine()
+    }
+    #$reader.ReadToEnd()
+    $reader.Close()
+    $response.Close()
+}
+
+#SET FOLDER PATH
+$folderPath= $ftp + "/" + $folder + "/"
+
+$files = Get-FTPDir -url $folderPath -credentials $credentials
+
+#LIST FILES
+$files 
+
+<<<< STEP 2 >>>>
+<<<< USE THIS TO DOWNLOAD >>>>
+#Run this to download files and change the REGEX to filter files.
+$webclient = New-Object System.Net.WebClient 
+$webclient.Credentials = New-Object System.Net.NetworkCredential($user,$pass) 
+$counter = 0
+#Extract txt files
+foreach ($file in ($files | where {$_ -like "*.txt"})){
+    $source=$folderPath + $file  
+    $destination = $target + $file 
+    $webclient.DownloadFile($source, $destination)
+
+    #PRINT FILE NAME AND COUNTER
+    $counter++
+    $counter
+    $source
+}
+
+<<<< STEP 2 >>>>
+<<<< USE THIS TO UPLOAD >>>>
+#Run this to upload files and change the REGEX to filter files.
+$webclient = New-Object System.Net.WebClient 
+$webclient.Credentials = New-Object System.Net.NetworkCredential($user,$pass)  
+foreach($item in (dir $target "*.txt")) { 
+    "Uploading $item."
+
+    try {
+        $uri = New-Object System.Uri($ftp+$item.Name) 
+        $webclient.UploadFile($uri, $item.FullName)
+    }
+
+    catch {
+        $err=$_
+        Write-Host $error.exception.message
+        continue
+    }
+}
